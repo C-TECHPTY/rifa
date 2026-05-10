@@ -44,12 +44,7 @@ require __DIR__ . '/includes/header.php';
                             <input type="hidden" name="id" value="<?= (int) $raffle['id'] ?>">
                             <button type="submit">Renovar</button>
                         </form>
-                        <form method="post" action="rifa_delete.php" class="inline-action" onsubmit="return confirm('Esto eliminará la rifa y sus datos relacionados. Escribe ELIMINAR para confirmar.') && (this.confirm.value = prompt('Escribe ELIMINAR para borrar definitivamente:') || '', this.confirm.value === 'ELIMINAR');">
-                            <input type="hidden" name="_csrf" value="<?= e(csrf_token()) ?>">
-                            <input type="hidden" name="id" value="<?= (int) $raffle['id'] ?>">
-                            <input type="hidden" name="confirm" value="">
-                            <button type="submit" class="danger-link">Eliminar</button>
-                        </form>
+                        <a class="danger-link" href="rifa_delete.php?id=<?= (int) $raffle['id'] ?>">Eliminar</a>
                     </td>
                 </tr>
             <?php endforeach; ?>

@@ -567,6 +567,20 @@ tr.is-highlighted td { background: rgba(214,168,79,.12); }
 .panel-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
 .panel-heading h2 { margin: 0; }
 .table-wrap { overflow-x: auto; }
+.danger-panel { border-color: rgba(255,104,104,.42); }
+.delete-warning {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 18px;
+  padding: 14px;
+  border: 1px solid rgba(255,104,104,.35);
+  border-radius: 8px;
+  background: rgba(255,104,104,.1);
+}
+.delete-warning strong { font-size: 1.2rem; color: #ffd2d2; }
+.delete-warning p { margin: 0; color: var(--muted); }
+.delete-warning ul { margin: 0; padding-left: 20px; color: var(--muted); }
+.danger-button { background: #ff6868; color: #1c1216; box-shadow: none; }
 .status { display: inline-flex; padding: 4px 8px; border-radius: 999px; background: rgba(255,255,255,.1); color: var(--muted); font-size: .82rem; }
 .status-active, .status-paid { background: rgba(51,196,122,.18); color: #bfffd9; }
 .status-confirmed, .status-approved { background: rgba(51,196,122,.18); color: #bfffd9; }
