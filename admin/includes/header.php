@@ -14,11 +14,13 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#171018">
     <title><?= e($pageTitle ?? 'Admin | RifaGrid') ?></title>
-    <link rel="manifest" href="../public/manifest.json">
+    <link rel="manifest" href="../manifest.webmanifest">
     <link rel="stylesheet" href="../public/assets/css/app.css">
     <script>
         window.RIFAGRID_CSRF = <?= json_encode(csrf_token()) ?>;
         window.RIFAGRID_PUSH_PUBLIC_KEY = <?= json_encode((string) config_value('WEB_PUSH_PUBLIC_KEY', '')) ?>;
+        window.RIFAGRID_SW_URL = '../service-worker.js';
+        window.RIFAGRID_SW_SCOPE = '../';
     </script>
 </head>
 <body class="admin-shell">

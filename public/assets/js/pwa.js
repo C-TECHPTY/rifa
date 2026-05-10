@@ -23,8 +23,9 @@
     if (serviceWorkerRegistration) return serviceWorkerRegistration;
     if (!('serviceWorker' in navigator)) throw new Error('Service Worker no disponible.');
 
-    const swUrl = new URL('service-worker.js', manifestBaseUrl());
-    serviceWorkerRegistration = await navigator.serviceWorker.register(swUrl);
+    const swUrl = new URL(window.RIFAGRID_SW_URL || 'service-worker.js', manifestBaseUrl());
+    const options = window.RIFAGRID_SW_SCOPE ? { scope: window.RIFAGRID_SW_SCOPE } : undefined;
+    serviceWorkerRegistration = await navigator.serviceWorker.register(swUrl, options);
     return serviceWorkerRegistration;
   }
 

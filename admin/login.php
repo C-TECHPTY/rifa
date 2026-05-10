@@ -21,8 +21,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#171018">
     <title>Login | RifaGrid</title>
+    <link rel="manifest" href="../manifest.webmanifest">
     <link rel="stylesheet" href="../public/assets/css/app.css">
+    <script>
+        window.RIFAGRID_SW_URL = '../service-worker.js';
+        window.RIFAGRID_SW_SCOPE = '../';
+    </script>
 </head>
 <body class="login-page">
     <form class="login-card" method="post">
@@ -37,8 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="password" name="password" required autocomplete="current-password">
         </label>
         <button class="button" type="submit">Entrar</button>
+        <button class="button button-ghost pwa-install" type="button" data-pwa-install data-always-visible="1">Instalar app admin</button>
         <p class="muted">Demo: admin@rifagrid.local / Admin123!</p>
     </form>
+    <script src="../public/assets/js/pwa.js"></script>
 </body>
 </html>
-
