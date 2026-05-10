@@ -1,26 +1,26 @@
 # RifaGrid / GIBEL Rifas
 
-WebApp/PWA en PHP 8+, MySQL, HTML, CSS y JavaScript vanilla para crear rifas online, publicar una grilla interactiva y reservar números con pago manual por Yappy/WhatsApp.
+WebApp/PWA en PHP 8+, MySQL, HTML, CSS y JavaScript vanilla para crear rifas online, publicar una grilla interactiva y reservar numeros con pago manual por Yappy/WhatsApp.
 
 ## Estado
 
 Sistema base implementado con:
 
-- Configuración base sin credenciales reales.
+- Configuracion base sin credenciales reales.
 - Login admin con `password_hash`.
 - CRUD de rifas.
 - Grilla configurable del 00 al 99, 00 al 100 o rango personalizado.
-- Página pública responsive.
-- Reserva transaccional de números.
+- Pagina publica responsive.
+- Reserva transaccional de numeros.
 - Pagos manuales y comprobantes.
-- Confirmación/cancelación admin.
+- Confirmacion/cancelacion admin.
 - Notificaciones internas.
 - PWA instalable preparada.
 - Ganadores por modo manual.
-- Transparencia pública con iniciales.
+- Transparencia publica con iniciales.
 - Puntos de fidelidad y reportes CSV.
-- Preparación WhatsApp API / bot futuro.
-- Diseño configurable por rifa con flyer completo y grilla interactiva.
+- Preparacion WhatsApp API / bot futuro.
+- Diseno configurable por rifa con flyer completo y grilla interactiva.
 
 El sistema sigue funcionando en modo manual con enlaces `wa.me` aunque no configures ninguna API externa.
 
@@ -28,14 +28,14 @@ El sistema sigue funcionando en modo manual con enlaces `wa.me` aunque no config
 
 - URL admin local: `http://localhost/rifa/admin/login.php`
 - Usuario: `admin@rifagrid.local`
-- Contraseña: `Admin123!`
+- Contrasena: `Admin123!`
 
 ## Carpetas
 
-- `public/`: sitio público, PWA, assets y uploads.
+- `public/`: sitio publico, PWA, assets y uploads.
 - `admin/`: panel administrativo.
 - `api/`: endpoints AJAX y futuras integraciones.
-- `config/`: configuración y conexión PDO.
+- `config/`: configuracion y conexion PDO.
 - `database/`: schema, seeds y migraciones.
 - `storage/logs/`: espacio para logs operativos.
 

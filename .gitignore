@@ -1,0 +1,28 @@
+# Local/private configuration
+config/config.php
+config/config.hosting.createcpty.php
+usuario database.txt
+pandqgxl_rifa_panama.sql
+tree_elements.json
+
+# Uploaded user files
+public/assets/uploads/flyers/*
+public/assets/uploads/comprobantes/*
+!public/assets/uploads/flyers/.gitkeep
+!public/assets/uploads/comprobantes/.gitkeep
+
+# Logs and runtime files
+storage/logs/*
+!storage/logs/.gitkeep
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Dependency/build folders if added later
+node_modules/
+vendor/
+dist/
+build/
