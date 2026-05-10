@@ -15,7 +15,7 @@ Sistema base implementado con:
 - Pagos manuales y comprobantes.
 - Confirmacion/cancelacion admin.
 - Notificaciones internas.
-- PWA instalable preparada.
+- PWA instalable con Web Push real para administradores.
 - Ganadores por modo manual.
 - Transparencia publica con iniciales.
 - Puntos de fidelidad y reportes CSV.
@@ -38,6 +38,7 @@ El sistema sigue funcionando en modo manual con enlaces `wa.me` aunque no config
 - `config/`: configuracion y conexion PDO.
 - `database/`: schema, seeds y migraciones.
 - `storage/logs/`: espacio para logs operativos.
+- `tools/generate_vapid_keys.php`: genera claves VAPID para notificaciones push.
 
 ## Seguridad
 

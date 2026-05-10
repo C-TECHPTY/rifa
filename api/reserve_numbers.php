@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/push.php';
 header('Content-Type: application/json; charset=utf-8');
 
 try {
@@ -85,15 +86,24 @@ try {
 
     $displayNumbers = array_map(static fn ($row) => $row['display_number'], $rows);
     sort($displayNumbers);
+    $reservationUrl = '../admin/reservas.php?reservation_id=' . $reservationId;
     $body = "Cliente: $name\nWhatsApp: $whatsapp\nRifa: {$raffle['title']}\nNúmeros: " . implode(', ', $displayNumbers) . "\nTotal: " . money_fmt($total) . "\nMétodo: $method\nEstado: Pendiente de pago/comprobante";
     $pdo->prepare('INSERT INTO notifications (type, title, body, url) VALUES (?, ?, ?, ?)')
-        ->execute(['reservation_created', 'Nueva reserva de rifa', $body, '../admin/reservas.php']);
+        ->execute(['reservation_created', 'Nueva reserva de rifa', $body, $reservationUrl]);
     $pdo->prepare('INSERT INTO payments (reservation_id, amount, method) VALUES (?, ?, ?)')
         ->execute([$reservationId, $total, $method]);
 
     audit_log($pdo, 'reservation_created', 'reservation', $reservationId, ['numbers' => $displayNumbers]);
 
     $pdo->commit();
+
+    push_notify_admins(
+        $pdo,
+        'Nueva reserva pendiente',
+        $name . ' reservo ' . implode(', ', $displayNumbers) . ' en ' . $raffle['title'] . ' por ' . money_fmt($total) . '.',
+        $reservationUrl,
+        ['tag' => 'reservation-' . $reservationId]
+    );
 
     $waMessage = rawurlencode("Hola, quiero participar en la rifa.\n\nNombre: $name\nWhatsApp: $whatsapp\nRifa: {$raffle['title']}\nNúmeros: " . implode(', ', $displayNumbers) . "\nTotal: " . money_fmt($total) . "\nMétodo: " . ucfirst($method) . "\n\nAdjunto comprobante de pago.");
 
@@ -112,4 +122,3 @@ try {
     http_response_code(422);
     echo json_encode(['ok' => false, 'message' => $e->getMessage()]);
 }
-

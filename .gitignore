@@ -18,6 +18,7 @@ storage/logs/*
 # OS/editor noise
 .DS_Store
 Thumbs.db
+.rnd
 .idea/
 .vscode/
 

@@ -76,14 +76,74 @@ Esto crea la tabla `push_subscriptions` para futuras notificaciones Web Push.
 
 ## Web Push futuro
 
-La estructura está lista, pero el envío real no se activa todavía. Para preparar claves:
+La estructura ahora envía Web Push reales cuando el dominio tiene HTTPS válido.
 
-1. Genera claves VAPID con la librería o servicio que decidas usar en la fase futura.
+### Fase 1: validar PWA instalable
+
+1. Confirma que existen `public/manifest.json` y `public/service-worker.js`.
+2. En el dominio con SSL abre `https://tudominio/rifa/admin/login.php`.
+3. En Chrome/Edge Android usa `Instalar app`. En iPhone usa Safari, Compartir, Agregar a pantalla de inicio.
+
+### Fase 2: activar permisos y guardar suscripción
+
+1. Genera claves VAPID:
+
+```bash
+php tools/generate_vapid_keys.php
+```
+
 2. Configura en `config/config.php`:
    - `WEB_PUSH_PUBLIC_KEY`
    - `WEB_PUSH_PRIVATE_KEY`
    - `WEB_PUSH_SUBJECT`
-3. Usa el botón `Alertas push` en admin para guardar la suscripción del dispositivo.
+3. Importa o verifica la tabla:
+
+```text
+database/phase9_real_web_push.sql
+```
+
+El endpoint `api/save_push_subscription.php` también crea/actualiza la tabla si falta.
+
+4. En el panel admin toca `Activar notificaciones en este dispositivo`.
+
+### Fase 3: enviar notificación de prueba
+
+Al activar el dispositivo, el navegador guarda la suscripción y llama a `api/test_push_notification.php`. Debe llegar una notificación de prueba con enlace a `admin/notificaciones.php`.
+
+### Fase 4: eventos conectados
+
+El sistema envía push al admin cuando:
+
+- Entra una nueva reserva pendiente.
+- Se sube un comprobante.
+- Una reserva se confirma o cancela.
+- Se marcan ganadores.
+
+Al tocar la notificación se abre `admin/reservas.php?reservation_id=ID` cuando aplica, para entrar directo al detalle/listado filtrado.
+
+### Fase 5: pruebas en celular
+
+Android:
+
+1. Abre el admin en Chrome con HTTPS.
+2. Instala la PWA.
+3. Entra al panel, toca `Activar notificaciones en este dispositivo` y acepta permisos.
+4. Crea una reserva desde otro navegador o dispositivo.
+5. Verifica que llegue la notificación y que al tocarla abra la reserva.
+
+iPhone:
+
+1. Usa iOS 16.4 o superior.
+2. Abre el sitio en Safari y agrega la PWA a inicio.
+3. Abre la PWA instalada, entra al admin y activa notificaciones.
+4. Acepta permisos cuando iOS los solicite.
+5. Prueba reserva, comprobante, confirmación/cancelación y ganadores.
+
+Notas:
+
+- En iPhone las notificaciones web funcionan desde la PWA instalada, no desde una pestaña normal de Safari.
+- Si cambias claves VAPID, vuelve a activar notificaciones en cada dispositivo.
+- Si un push falla, `push_subscriptions.last_error` guarda el error y el flujo principal de reservas/pagos continúa.
 
 ## Publicar ganadores
 

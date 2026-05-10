@@ -3,7 +3,18 @@ require_once __DIR__ . '/includes/auth.php';
 $admin = require_admin();
 $pdo = db();
 $status = $_GET['status'] ?? '';
-$where = $status !== '' ? 'WHERE r.status = ?' : '';
+$selectedReservationId = (int) ($_GET['reservation_id'] ?? 0);
+$whereParts = [];
+$params = [];
+if ($status !== '') {
+    $whereParts[] = 'r.status = ?';
+    $params[] = $status;
+}
+if ($selectedReservationId > 0) {
+    $whereParts[] = 'r.id = ?';
+    $params[] = $selectedReservationId;
+}
+$where = $whereParts ? 'WHERE ' . implode(' AND ', $whereParts) : '';
 $stmt = $pdo->prepare("
     SELECT r.*, c.name, c.whatsapp, c.email, ra.title,
       nums.numbers,
@@ -26,7 +37,7 @@ $stmt = $pdo->prepare("
     ORDER BY r.created_at DESC
     LIMIT 150
 ");
-$stmt->execute($status !== '' ? [$status] : []);
+$stmt->execute($params);
 $reservations = $stmt->fetchAll();
 $pageTitle = 'Reservas';
 require __DIR__ . '/includes/header.php';
@@ -46,7 +57,7 @@ require __DIR__ . '/includes/header.php';
             <thead><tr><th>Cliente</th><th>Rifa</th><th>Números</th><th>Total</th><th>Estado</th><th>Comprobante</th><th>Acciones</th></tr></thead>
             <tbody>
             <?php foreach ($reservations as $row): ?>
-                <tr data-reservation-row="<?= (int) $row['id'] ?>">
+                <tr class="<?= (int) $row['id'] === $selectedReservationId ? 'is-highlighted' : '' ?>" data-reservation-row="<?= (int) $row['id'] ?>">
                     <td><?= e($row['name']) ?><br><small><?= e($row['whatsapp']) ?></small></td>
                     <td><?= e($row['title']) ?><br><small><?= e($row['created_at']) ?></small></td>
                     <td><?= e($row['numbers'] ?? '') ?></td>

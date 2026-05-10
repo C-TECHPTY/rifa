@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../admin/includes/auth.php';
+require_once __DIR__ . '/../config/push.php';
 header('Content-Type: application/json; charset=utf-8');
 
 try {
@@ -62,9 +63,25 @@ try {
     }
 
     $displayNumbers = array_column($numbers, 'display_number');
+    $reservationUrl = '../admin/reservas.php?reservation_id=' . $reservationId;
     audit_log($pdo, 'payment_confirmed', 'reservation', $reservationId, ['numbers' => $displayNumbers, 'points' => $points]);
 
     $pdo->commit();
+
+    try {
+        $body = "Cliente: {$reservation['name']}\nRifa: {$reservation['title']}\nNúmeros: " . implode(', ', $displayNumbers) . "\nTotal: " . money_fmt($reservation['total_amount']);
+        $pdo->prepare('INSERT INTO notifications (type, title, body, url) VALUES (?, ?, ?, ?)')
+            ->execute(['reservation_paid', 'Reserva confirmada', $body, $reservationUrl]);
+        push_notify_admins(
+            $pdo,
+            'Reserva confirmada',
+            $reservation['name'] . ' quedo confirmado en ' . $reservation['title'] . ' con ' . implode(', ', $displayNumbers) . '.',
+            $reservationUrl,
+            ['tag' => 'reservation-' . $reservationId]
+        );
+    } catch (Throwable) {
+        // La confirmacion de pago no debe fallar si el canal push no esta disponible.
+    }
 
     $message = "✅ Pago confirmado\nGracias por participar en {$reservation['title']}.\nTus números confirmados son: " . implode(', ', $displayNumbers) . "\nTotal pagado: " . money_fmt($reservation['total_amount']) . "\nFecha del sorteo: " . ($reservation['draw_date'] ? date('d/m/Y h:i A', strtotime($reservation['draw_date'])) : 'Por anunciar') . "\nGuarda este mensaje como comprobante.";
     $waUrl = 'https://wa.me/' . normalize_phone($reservation['whatsapp']) . '?text=' . rawurlencode($message);

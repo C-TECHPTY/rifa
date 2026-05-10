@@ -51,7 +51,7 @@ try {
             <a class="notification-pill" id="notificationCount" href="notificaciones.php"><?= $unreadCount ?></a>
             <a class="button button-ghost" href="../public/index.php" target="_blank">Ver público</a>
             <button class="button button-ghost pwa-install" type="button" data-pwa-install data-always-visible="1">Instalar app</button>
-            <button class="button button-ghost" type="button" data-web-push-subscribe>Alertas push</button>
+            <button class="button button-ghost" type="button" data-web-push-subscribe>Activar notificaciones en este dispositivo</button>
             <a class="button button-ghost" href="logout.php">Salir</a>
         </div>
     </header>

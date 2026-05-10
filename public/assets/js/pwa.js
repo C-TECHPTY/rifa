@@ -1,5 +1,6 @@
 (function () {
   let deferredPrompt = null;
+  let serviceWorkerRegistration = null;
   const installButtons = [];
 
   function isStandalone() {
@@ -12,6 +13,19 @@
 
   function isSecureInstallContext() {
     return window.isSecureContext || isLocalhost();
+  }
+
+  function manifestBaseUrl() {
+    return document.querySelector('link[rel="manifest"]')?.href || window.location.href;
+  }
+
+  async function getServiceWorkerRegistration() {
+    if (serviceWorkerRegistration) return serviceWorkerRegistration;
+    if (!('serviceWorker' in navigator)) throw new Error('Service Worker no disponible.');
+
+    const swUrl = new URL('service-worker.js', manifestBaseUrl());
+    serviceWorkerRegistration = await navigator.serviceWorker.register(swUrl);
+    return serviceWorkerRegistration;
   }
 
   function setInstallState() {
@@ -31,7 +45,7 @@
       } else {
         button.hidden = !button.dataset.alwaysVisible;
         button.disabled = false;
-        button.title = 'Si el botón no abre instalación, usa el menú del navegador.';
+        button.title = 'Si el boton no abre instalacion, usa el menu del navegador.';
       }
     });
 
@@ -42,11 +56,11 @@
     installButtons.push(button);
     button.addEventListener('click', async () => {
       if (!isSecureInstallContext()) {
-        alert('Para instalar la app necesitas activar HTTPS válido en el dominio. Por ahora puedes usarla desde el navegador con http://, pero Chrome no permite instalar PWA sin SSL.');
+        alert('Para instalar la app necesitas activar HTTPS valido en el dominio. Por ahora puedes usarla desde el navegador con http://, pero Chrome no permite instalar PWA sin SSL.');
         return;
       }
       if (!deferredPrompt) {
-        alert('Si tu navegador no muestra instalación automática, abre el menú de Chrome/Edge y elige "Instalar app" o "Agregar a pantalla principal". En iPhone usa Compartir > Agregar a inicio.');
+        alert('Si tu navegador no muestra instalacion automatica, abre el menu de Chrome/Edge y elige "Instalar app" o "Agregar a pantalla principal". En iPhone usa Compartir > Agregar a inicio.');
         return;
       }
       deferredPrompt.prompt();
@@ -72,11 +86,7 @@
     document.querySelectorAll('[data-pwa-install]').forEach(registerInstallButton);
     document.querySelectorAll('[data-web-push-subscribe]').forEach(registerPushButton);
     setInstallState();
-
-    if ('serviceWorker' in navigator) {
-      const swUrl = new URL('service-worker.js', document.querySelector('link[rel="manifest"]')?.href || window.location.href);
-      navigator.serviceWorker.register(swUrl).catch(() => {});
-    }
+    getServiceWorkerRegistration().catch(() => undefined);
   });
 
   function base64UrlToUint8Array(base64Url) {
@@ -90,7 +100,7 @@
     const publicKey = window.RIFAGRID_PUSH_PUBLIC_KEY || '';
     if (!('serviceWorker' in navigator) || !('PushManager' in window) || !publicKey) {
       button.disabled = true;
-      button.title = publicKey ? 'Web Push no está disponible en este navegador.' : 'Configura WEB_PUSH_PUBLIC_KEY para activar Web Push.';
+      button.title = publicKey ? 'Web Push no esta disponible en este navegador.' : 'Configura WEB_PUSH_PUBLIC_KEY para activar Web Push.';
       return;
     }
 
@@ -98,22 +108,35 @@
       button.disabled = true;
       const original = button.textContent;
       button.textContent = 'Activando...';
+
       try {
+        const registration = await getServiceWorkerRegistration();
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') throw new Error('Permiso de notificaciones denegado.');
-        const registration = await navigator.serviceWorker.ready;
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: base64UrlToUint8Array(publicKey),
-        });
+
+        let subscription = await registration.pushManager.getSubscription();
+        if (!subscription) {
+          subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: base64UrlToUint8Array(publicKey),
+          });
+        }
 
         const form = new FormData();
         form.set('_csrf', window.RIFAGRID_CSRF || '');
         form.set('subscription', JSON.stringify(subscription));
-        const response = await fetch('../api/push_subscribe.php', { method: 'POST', body: form, headers: { Accept: 'application/json' } });
+        const response = await fetch('../api/save_push_subscription.php', { method: 'POST', body: form, headers: { Accept: 'application/json' } });
         const data = await response.json();
-        if (!data.ok) throw new Error(data.message || 'No se pudo guardar la suscripción.');
+        if (!data.ok) throw new Error(data.message || 'No se pudo guardar la suscripcion.');
+
         button.textContent = 'Push activo';
+        button.title = data.message || 'Notificaciones activadas en este dispositivo.';
+
+        if (data.configured) {
+          const testForm = new FormData();
+          testForm.set('_csrf', window.RIFAGRID_CSRF || '');
+          fetch('../api/test_push_notification.php', { method: 'POST', body: testForm, headers: { Accept: 'application/json' } }).catch(() => undefined);
+        }
       } catch (error) {
         alert(error.message);
         button.textContent = original;

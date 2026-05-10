@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../admin/includes/auth.php';
+require_once __DIR__ . '/../config/push.php';
 header('Content-Type: application/json; charset=utf-8');
 
 function last_two_digits(string $value): string
@@ -37,6 +38,7 @@ try {
     }
 
     $created = [];
+    $winnerReservationIds = [];
     foreach ($draws as $label => $data) {
         if ($data['draw'] === '') {
             continue;
@@ -74,11 +76,28 @@ try {
         $insert->execute([$raffleId, $number['id'], $number['reservation_id'], $label, $prizeDescription, $data['draw'], $secretCode]);
         $pdo->prepare("UPDATE raffle_numbers SET status = 'winner' WHERE id = ?")->execute([$number['id']]);
         $created[] = "$label: ganador $winningNumber registrado";
+        $winnerReservationIds[] = (int) $number['reservation_id'];
     }
 
     $pdo->prepare("UPDATE raffles SET status = 'drawn' WHERE id = ?")->execute([$raffleId]);
     audit_log($pdo, 'winners_marked', 'raffle', $raffleId, ['results' => $created]);
     $pdo->commit();
+
+    try {
+        $url = $winnerReservationIds ? '../admin/reservas.php?reservation_id=' . $winnerReservationIds[0] : '../admin/ganadores.php';
+        $body = "Rifa: {$raffle['title']}\nResultados:\n" . implode("\n", $created);
+        $pdo->prepare('INSERT INTO notifications (type, title, body, url) VALUES (?, ?, ?, ?)')
+            ->execute(['winners_marked', 'Ganadores marcados', $body, $url]);
+        push_notify_admins(
+            $pdo,
+            'Ganadores marcados',
+            $raffle['title'] . ': ' . ($created ? implode(' | ', $created) : 'sin resultados ingresados') . '.',
+            $url,
+            ['tag' => 'raffle-winners-' . $raffleId]
+        );
+    } catch (Throwable) {
+        // El sorteo no debe fallar si el canal push no esta disponible.
+    }
 
     echo json_encode(['ok' => true, 'message' => $created ? implode("\n", $created) : 'No se ingresaron resultados.']);
 } catch (Throwable $e) {

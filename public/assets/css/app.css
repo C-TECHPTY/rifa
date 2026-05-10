@@ -35,6 +35,7 @@ code { word-break: break-all; }
 table { width: 100%; border-collapse: collapse; }
 th, td { padding: 14px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
 th { color: var(--primary); font-size: .85rem; text-transform: uppercase; }
+tr.is-highlighted td { background: rgba(214,168,79,.12); }
 
 .button {
   display: inline-flex;
@@ -650,7 +651,7 @@ th { color: var(--primary); font-size: .85rem; text-transform: uppercase; }
     line-height: 1.1;
   }
   .admin-main { padding: 12px; }
-  .topbar-actions { width: 100%; display: flex; flex-wrap: nowrap; gap: 6px; }
+  .topbar-actions { width: 100%; display: flex; flex-wrap: wrap; gap: 6px; }
   .topbar-actions .button,
   .topbar-actions .pwa-install {
     flex: 1 1 0;
@@ -658,9 +659,10 @@ th { color: var(--primary); font-size: .85rem; text-transform: uppercase; }
     min-height: 36px;
     padding: 0 8px;
     font-size: .78rem;
-    white-space: nowrap;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.1;
   }
-  .topbar-actions [data-web-push-subscribe] { display: none; }
   .home-stats, .how-it-works { grid-template-columns: 1fr; }
   .grid-section { padding: 12px; }
   .number-grid { grid-template-columns: repeat(auto-fit, minmax(48px, 1fr)); gap: 7px; }
@@ -680,7 +682,7 @@ th { color: var(--primary); font-size: .85rem; text-transform: uppercase; }
   .admin-main { padding: 10px; }
   .admin-sidebar nav { grid-template-columns: 1fr; }
   .topbar-actions { grid-template-columns: 1fr 1fr; }
-  .topbar-actions { display: grid; grid-template-columns: 40px 1fr 1fr; }
+  .topbar-actions { display: grid; grid-template-columns: 40px 1fr; }
   .notification-pill { min-width: 40px; border-radius: 8px; }
   .admin-sidebar nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .metric-grid article,

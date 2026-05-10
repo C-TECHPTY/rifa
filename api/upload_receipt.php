@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/push.php';
 header('Content-Type: application/json; charset=utf-8');
 
 try {
@@ -66,11 +67,20 @@ try {
     $pdo->prepare('INSERT INTO payment_receipts (reservation_id, file_path, original_name, mime_type) VALUES (?, ?, ?, ?)')
         ->execute([$reservationId, $publicPath, $_FILES['receipt']['name'], $mime]);
 
+    $reservationUrl = '../admin/reservas.php?reservation_id=' . $reservationId;
     $body = "Cliente: {$reservation['name']}\nRifa: {$reservation['title']}\nTotal: " . money_fmt($reservation['total_amount']) . "\nRevisar y confirmar en el panel admin.";
     $pdo->prepare('INSERT INTO notifications (type, title, body, url) VALUES (?, ?, ?, ?)')
-        ->execute(['receipt_uploaded', 'Nuevo comprobante recibido', $body, '../admin/comprobantes.php']);
+        ->execute(['receipt_uploaded', 'Nuevo comprobante recibido', $body, $reservationUrl]);
 
     audit_log($pdo, 'receipt_uploaded', 'reservation', $reservationId, ['file' => $publicPath]);
+
+    push_notify_admins(
+        $pdo,
+        'Nuevo comprobante recibido',
+        $reservation['name'] . ' subio comprobante de ' . money_fmt($reservation['total_amount']) . ' para ' . $reservation['title'] . '.',
+        $reservationUrl,
+        ['tag' => 'receipt-' . $reservationId]
+    );
 
     echo json_encode(['ok' => true, 'message' => 'Comprobante recibido. El admin lo revisará para confirmar tu pago.']);
 } catch (Throwable $e) {
